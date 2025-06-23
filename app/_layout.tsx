@@ -1,33 +1,37 @@
+// app/_layout.tsx
+import ProviderContext from '@/app/context/providerContext';
 import '@/global.css';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    'LTKaraoke-Bold': require('@/assets/font/LTKaraoke-Bold.ttf'),
-    'LTKaraoke-Light': require('@/assets/font/LTKaraoke-Light.ttf'),
-    'LTKaraoke-Regular': require('@/assets/font/LTKaraoke-Regular.ttf'),
-    'LTKaraoke-Medium': require('@/assets/font/LTKaraoke-Medium.ttf'),
-    'LTKaraoke-Semibold': require('@/assets/fonts/LTKaraoke-Semibold.ttf'),
+  const [fontsLoaded, fontError] = useFonts({
+    'LTKaraoke-Bold': require('../assets/fonts/LTKaraoke-Bold.ttf'),
+    'LTKaraoke-Light': require('../assets/fonts/LTKaraoke-Light.ttf'),
+    'LTKaraoke-Regular': require('../assets/fonts/LTKaraoke-Regular.ttf'),
+    'LTKaraoke-Medium': require('../assets/fonts/LTKaraoke-SemiBold.ttf'),
+    'LTKaraoke-Semibold': require('../assets/fonts/LTKaraoke-SemiBold.ttf'), 
   });
 
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
+  }, [fontsLoaded, fontError]);
 
-  if (!loaded && !error) {
-    return null;
-  }
+  useEffect(() => {
+    onLayoutRootView();
+  }, [onLayoutRootView]);
+
+  if (!fontsLoaded && !fontError) return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <ProviderContext>
+      <Slot/>
+    </ProviderContext>
   );
 }
